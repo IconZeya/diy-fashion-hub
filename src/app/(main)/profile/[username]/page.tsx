@@ -126,25 +126,32 @@ export default function ProfilePage() {
         }
 
         // Fetch user's DIY requests
-        const requestsParams = new URLSearchParams()
-        requestsParams.append('select', '*, user:profiles!diy_requests_user_id_fkey(*)')
-        requestsParams.append('user_id', `eq.${profile.id}`)
-        requestsParams.append('order', 'created_at.desc')
+        try {
+          const requestsParams = new URLSearchParams()
+          requestsParams.append('select', '*, user:profiles!diy_requests_user_id_fkey(*)')
+          requestsParams.append('user_id', `eq.${profile.id}`)
+          requestsParams.append('order', 'created_at.desc')
 
-        const requestsResponse = await fetch(
-          `${SUPABASE_URL}/rest/v1/diy_requests?${requestsParams.toString()}`,
-          {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-              'Accept': 'application/json',
-            },
+          const requestsResponse = await fetch(
+            `${SUPABASE_URL}/rest/v1/diy_requests?${requestsParams.toString()}`,
+            {
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Accept': 'application/json',
+              },
+            }
+          )
+
+          if (requestsResponse.ok) {
+            const contentType = requestsResponse.headers.get('content-type')
+            if (contentType?.includes('application/json')) {
+              const requestsData = await requestsResponse.json()
+              setRequests(requestsData as DIYRequestWithUser[])
+            }
           }
-        )
-
-        if (requestsResponse.ok) {
-          const requestsData = await requestsResponse.json()
-          setRequests(requestsData as DIYRequestWithUser[])
+        } catch (reqError) {
+          console.error('Error fetching requests:', reqError)
         }
       } catch (error) {
         console.error('Error fetching content:', error)

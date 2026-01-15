@@ -41,6 +41,11 @@ export function useRequests(options: UseRequestsOptions = {}) {
           throw new Error('Failed to fetch requests')
         }
 
+        const contentType = response.headers.get('content-type')
+        if (!contentType?.includes('application/json')) {
+          throw new Error('Invalid response format')
+        }
+
         const result = await response.json()
 
         if (reset) {
@@ -154,6 +159,10 @@ export function useRequest(requestId: string) {
       if (!response.ok) {
         throw new Error('Failed to fetch request')
       }
+      const contentType = response.headers.get('content-type')
+      if (!contentType?.includes('application/json')) {
+        throw new Error('Invalid response format')
+      }
       const data = await response.json()
       setRequest(data)
     } catch (error) {
@@ -178,6 +187,11 @@ export function useRequest(requestId: string) {
         const response = await fetch(`/api/requests/${requestId}/replies?${params.toString()}`)
         if (!response.ok) {
           throw new Error('Failed to fetch replies')
+        }
+
+        const contentType = response.headers.get('content-type')
+        if (!contentType?.includes('application/json')) {
+          throw new Error('Invalid response format')
         }
 
         const result = await response.json()
